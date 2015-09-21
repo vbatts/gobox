@@ -10,15 +10,15 @@ import (
 func getRelativeGoboxBinaryPath() (string, error) {
 	callname := os.Args[0]
 	// First check: Is gobox in $PATH?
-	path, e := exec.LookPath(callname)
-	if e == nil {
+	path, err := exec.LookPath(callname)
+	if err == nil {
 		return path, nil
 	}
 
 	// Second check: Is gobox in the current directory?
-	cwd, e := os.Getwd()
-	if e != nil {
-		return "", e
+	cwd, err := os.Getwd()
+	if err != nil {
+		return "", err
 	}
 	path = filepath.Join(cwd, "gobox")
 	if PathExists(path) {
@@ -28,9 +28,9 @@ func getRelativeGoboxBinaryPath() (string, error) {
 }
 
 func GetGoboxBinaryPath() (string, error) {
-	relpath, e := getRelativeGoboxBinaryPath()
-	if e != nil {
-		return "", e
+	relpath, err := getRelativeGoboxBinaryPath()
+	if err != nil {
+		return "", err
 	}
 	return filepath.Abs(relpath)
 }

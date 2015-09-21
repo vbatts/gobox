@@ -26,9 +26,9 @@ func init() {
 }
 
 func pwd(call []string) error {
-	pwd, e := os.Getwd()
-	if e != nil {
-		return e
+	pwd, err := os.Getwd()
+	if err != nil {
+		return err
 	}
 	println(pwd)
 	return nil
@@ -36,18 +36,20 @@ func pwd(call []string) error {
 
 func cd(call []string) error {
 	if len(call) != 2 {
-		return errors.New("`cd <directory>`")
+		if home := os.Getenv("HOME"); home != "" {
+			return os.Chdir(home)
+		}
+		return os.Chdir("/")
 	}
-	e := os.Chdir(call[1])
-	return e
+	return os.Chdir(call[1])
 }
 
-func exit(call []string) (e error) {
+func exit(call []string) (err error) {
 	code := 0
 	if len(call) >= 2 {
-		code, e = strconv.Atoi(call[1])
-		if e != nil {
-			return e
+		code, err = strconv.Atoi(call[1])
+		if err != nil {
+			return err
 		}
 	}
 	os.Exit(code)

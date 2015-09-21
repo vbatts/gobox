@@ -2,8 +2,9 @@ package main
 
 import (
 	"flag"
-	"github.com/surma/gobox/pkg/common"
 	"path/filepath"
+
+	"github.com/surma/gobox/pkg/common"
 )
 
 const (
@@ -17,16 +18,16 @@ var (
 	helpFlag    = flagSet.Bool("help", false, "Show help")
 )
 
-func Gobox(call []string) (e error) {
-	e = flagSet.Parse(call[1:])
-	if e != nil {
+func Gobox(call []string) (err error) {
+	err = flagSet.Parse(call[1:])
+	if err != nil {
 		return
 	}
 
 	if *listFlag {
 		list()
 	} else if *installFlag != "" {
-		e = install(*installFlag)
+		err = install(*installFlag)
 	} else {
 		help()
 	}
@@ -34,7 +35,7 @@ func Gobox(call []string) (e error) {
 }
 
 func help() {
-	println("`gobox` [options]")
+	println("gobox [options]")
 	flagSet.PrintDefaults()
 	println()
 	println("Version", VERSION)
@@ -50,9 +51,9 @@ func list() {
 }
 
 func install(path string) error {
-	goboxpath, e := common.GetGoboxBinaryPath()
-	if e != nil {
-		return e
+	goboxpath, err := common.GetGoboxBinaryPath()
+	if err != nil {
+		return err
 	}
 	for name := range Applets {
 		// Don't overwrite the executable
@@ -60,9 +61,9 @@ func install(path string) error {
 			continue
 		}
 		newpath := filepath.Join(path, name)
-		e = common.ForcedSymlink(goboxpath, newpath)
-		if e != nil {
-			common.DumpError(e)
+		err = common.ForcedSymlink(goboxpath, newpath)
+		if err != nil {
+			common.DumpError(err)
 		}
 	}
 	return nil

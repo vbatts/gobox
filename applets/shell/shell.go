@@ -2,10 +2,11 @@ package shell
 
 import (
 	"fmt"
-	"github.com/surma/gobox/pkg/common"
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/surma/gobox/pkg/common"
 )
 
 func Shell(call []string) error {
@@ -15,9 +16,9 @@ func Shell(call []string) error {
 		call = call[0:1]
 	}
 	if len(call) == 2 {
-		f, e := os.Open(call[1])
-		if e != nil {
-			return e
+		f, err := os.Open(call[1])
+		if err != nil {
+			return err
 		}
 		defer f.Close()
 		in = common.NewBufferedReader(f)
@@ -26,15 +27,15 @@ func Shell(call []string) error {
 		in = common.NewBufferedReader(os.Stdin)
 	}
 
-	var e error
+	var err error
 	var line string
-	for e == nil {
+	for err == nil {
 		if interactive {
 			fmt.Print("> ")
 		}
-		line, e = in.ReadWholeLine()
-		if e != nil {
-			return e
+		line, err = in.ReadWholeLine()
+		if err != nil {
+			return err
 		}
 		if isComment(line) {
 			continue
@@ -58,22 +59,19 @@ func isComment(line string) bool {
 	return strings.HasPrefix(line, "#")
 }
 
-func execute(cmd []string) error {
-	if len(cmd) == 0 {
+func execute(cmdArgs []string) error {
+	if len(cmdArgs) == 0 {
 		return nil
 	}
-	if isBuiltIn(cmd[0]) {
-		builtin := Builtins[cmd[0]]
-		return builtin(cmd)
-	} else {
-		cmd := exec.Command(cmd[0], cmd[1:]...)
-		cmd.Stdout = os.Stdout
-		cmd.Stdin = os.Stdin
-		cmd.Stderr = os.Stderr
-		e := cmd.Run()
-		return e
+	if isBuiltIn(cmdArgs[0]) {
+		builtin := Builtins[cmdArgs[0]]
+		return builtin(cmdArgs)
 	}
-	return nil
+	cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...)
+	cmd.Stdout = os.Stdout
+	cmd.Stdin = os.Stdin
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }
 
 func isBuiltIn(cmd string) bool {
